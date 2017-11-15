@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FillBlankDemo</string>
+    <string name="submit_answer">提交答案</string>
 </resources>

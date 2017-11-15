@@ -1,6 +1,7 @@
 package com.demo.tangminglong.fillblankdemo;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.text.Editable;
@@ -28,20 +29,29 @@ import java.util.List;
 public class SpansManager {
 
     private static final String SPILT_TAG = "____";
-    private static final String FILL_TAG = "<edit>";
+    private static final String FILL_TAG = "&nbsp;<edit>&nbsp;";//fix bugs -----多个空连续的情况下
     private static final String FILL_TAG_NAME = "edit";
     private TextView mTv;
     private EditText mEt;
     private List<ReplaceSpan> mSpans;
-    public int mOldSpan = -1;
-    RectF mRf;
+    int mOldSpan = -1;
+    private RectF mRf;
     private int mFontT; // 字体top
     private int mFontB;// 字体bottom
-    protected ImmFocus mFocus = new ImmFocus();
-    private Activity mContent;
+    private ImmFocus mFocus = new ImmFocus();
+    private Activity mActivity;
+    private Fragment mFragment;
+    private ReplaceSpan mCheckedSpan;//当前选中的空格
 
-    public SpansManager(Activity ac,TextView tv, EditText et) {
-        this.mContent = ac;
+    SpansManager(Activity ac, TextView tv, EditText et) {
+        this.mActivity = ac;
+        this.mTv = tv;
+        this.mEt = et;
+        mSpans = new ArrayList<>();
+    }
+
+    public SpansManager(Fragment fragment, TextView tv, EditText et) {
+        this.mFragment = fragment;
         this.mTv = tv;
         this.mEt = et;
         mSpans = new ArrayList<>();
@@ -59,7 +69,14 @@ public class SpansManager {
                     TextPaint paint = new TextPaint(mTv.getPaint());
                     paint.setColor(mTv.getResources().getColor(R.color.ggfx_dark_blue));
                     ReplaceSpan span = new ReplaceSpan(mTv.getContext(), paint);
-                    span.mOnClick = (ReplaceSpan.OnClickListener) mContent;
+                    if (mActivity instanceof ReplaceSpan.OnClickListener)
+                        span.mOnClick = (ReplaceSpan.OnClickListener) mActivity;
+                    else if(mFragment instanceof ReplaceSpan.OnClickListener){
+                        span.mOnClick = (ReplaceSpan.OnClickListener) mFragment;
+                    }else {
+                        throw  new IllegalArgumentException("unImplements ReplaceSpan.OnClickListener");
+                    }
+
                     span.mText = "";
                     span.id = index++;
                     mSpans.add(span);
@@ -77,6 +94,7 @@ public class SpansManager {
      * @param position
      */
     public void setSpanChecked(int position){
+        mCheckedSpan = mSpans.get(position);
         for (int i = 0 ; i < mSpans.size();i++) {
             ReplaceSpan replaceSpan = mSpans.get(i);
             if (i == position) {
@@ -206,5 +224,23 @@ public class SpansManager {
             e.printStackTrace();
         }
 
+    }
+
+    public List<String> getMyAnswer(){
+        List<String> myAnswerList = new ArrayList<>();
+        for (int i = 0 ; i < mSpans.size() ; i++){
+            myAnswerList.add(mSpans.get(i).mText);
+        }
+        return myAnswerList;
+    }
+
+    public ReplaceSpan getCheckedReplaceSpan(){
+        return mCheckedSpan;
+    }
+
+    public void setLastCheckedSpanText(String editText) {
+        if (mCheckedSpan != null){
+            mCheckedSpan.mText = editText;
+        }
     }
 }

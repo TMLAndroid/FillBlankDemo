@@ -5,8 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.demo.tangminglong.fillblankdemo.MainActivity">
-
+    <Button
+        android:id="@+id/btn_submit"
+        android:text="@string/submit_answer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <TextView
+        android:layout_below="@id/btn_submit"
         android:id="@+id/tv_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
